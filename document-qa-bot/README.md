@@ -4,7 +4,7 @@
 Support and operations teams lose time manually searching long internal documents to answer repetitive questions quickly and accurately.
 
 ## Architecture
-![n8n canvas placeholder](./assets/architecture-placeholder.png)
+![n8n canvas placeholder](./assets/architecture.png)
 
 ## Tech stack
 ![n8n](https://img.shields.io/badge/n8n-Workflow_Automation-EA4B71?logo=n8n&logoColor=white)
