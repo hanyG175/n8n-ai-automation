@@ -19,7 +19,7 @@
       "webhookId": "20f7351a-ced3-4b16-8411-645d8e38b4dc",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -41,7 +41,7 @@
       "webhookId": "4c35c890-b113-465f-a036-927ad385dedc",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -67,7 +67,7 @@
       ],
       "credentials": {
         "pineconeApi": {
-          "id": "2pX3pb43ytgkAptC",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Pinecone account"
         }
       }
@@ -84,7 +84,7 @@
       ],
       "credentials": {
         "googlePalmApi": {
-          "id": "dPswnBgIBBHNqxlf",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -202,7 +202,7 @@
       "name": "Knowledge Base",
       "credentials": {
         "pineconeApi": {
-          "id": "2pX3pb43ytgkAptC",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Pinecone account"
         }
       }
@@ -222,7 +222,7 @@
       "name": "OpenRouter Chat Model",
       "credentials": {
         "openRouterApi": {
-          "id": "WoaCMaiSJcCFoX2f",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "OpenRouter account"
         }
       }
@@ -377,7 +377,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -412,7 +412,7 @@
       "webhookId": "42ed410a-1b49-4a0e-80d1-aca3b99947d9",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -434,7 +434,7 @@
       "webhookId": "42ed410a-1b49-4a0e-80d1-aca3b99947d9",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -461,7 +461,7 @@
       ],
       "credentials": {
         "pineconeApi": {
-          "id": "2pX3pb43ytgkAptC",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Pinecone account"
         }
       }
@@ -529,7 +529,7 @@
       "webhookId": "353cde21-ef4e-4cdd-88fb-8044873d37d2",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -547,7 +547,7 @@
             {
               "id": "e24fc360-23ef-4002-829e-8ac44c24c570",
               "leftValue": "={{ $json.message.chat.id }}",
-              "rightValue": 7048112006,
+              "rightValue": "YOUR_PHONE_NUMBER",
               "operator": {
                 "type": "number",
                 "operation": "equals"
@@ -618,17 +618,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": "gid=YOUR_SHEET_GID",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -706,7 +706,7 @@
       "name": "Logs",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "vOUpHi800jl7z6Vx",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       }
@@ -728,7 +728,7 @@
       "webhookId": "24cf2d87-f713-4f70-a4fd-a5a0eae44865",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -773,7 +773,7 @@
       "webhookId": "24cf2d87-f713-4f70-a4fd-a5a0eae44865",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       }
@@ -783,17 +783,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": "gid=YOUR_SHEET_GID",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -882,7 +882,7 @@
       "name": "Update Feedback Column",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "vOUpHi800jl7z6Vx",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       }
