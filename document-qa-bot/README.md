@@ -6,8 +6,6 @@ Support and operations teams lose time manually searching long internal document
 ## Architecture
 ![n8n canvas placeholder](./assets/architecture-placeholder.png)
 
-> Placeholder: add the exported n8n canvas screenshot here.
-
 ## Tech stack
 ![n8n](https://img.shields.io/badge/n8n-Workflow_Automation-EA4B71?logo=n8n&logoColor=white)
 ![Telegram](https://img.shields.io/badge/Telegram-Chat_Interface-26A5E4?logo=telegram&logoColor=white)
