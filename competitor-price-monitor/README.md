@@ -6,8 +6,6 @@ Pricing and market teams need early warning when competitor product pricing or a
 ## Architecture
 ![n8n canvas placeholder](./assets/architecture-placeholder.png)
 
-> Placeholder: add the exported n8n canvas screenshot here.
-
 ## Tech stack
 ![n8n](https://img.shields.io/badge/n8n-Workflow_Automation-EA4B71?logo=n8n&logoColor=white)
 ![HTTP](https://img.shields.io/badge/HTTP-Web_Scraping-00599C)
@@ -33,5 +31,3 @@ Pricing and market teams need early warning when competitor product pricing or a
 
 ## Demo
 ![Demo placeholder](./assets/demo-placeholder.gif)
-
-> Placeholder: add a short alert-flow demo GIF or video link.
