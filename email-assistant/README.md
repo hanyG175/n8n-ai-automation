@@ -6,8 +6,6 @@ Teams handling growing inbox volume need faster, consistent replies without losi
 ## Architecture
 ![n8n canvas placeholder](./assets/architecture-placeholder.png)
 
-> Placeholder: add the exported n8n canvas screenshot here.
-
 ## Tech stack
 ![n8n](https://img.shields.io/badge/n8n-Workflow_Automation-EA4B71?logo=n8n&logoColor=white)
 ![Gmail](https://img.shields.io/badge/Gmail-Email_Trigger_&_Reply-D14836?logo=gmail&logoColor=white)
