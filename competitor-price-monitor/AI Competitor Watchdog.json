@@ -85,17 +85,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "CRM Simulation",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 540131206,
+          "value": "YOUR_SHEET_GID",
           "mode": "list",
           "cachedResultName": "Competition detection",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=540131206"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
         },
         "filtersUI": {
           "values": [
@@ -117,7 +117,7 @@
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "vOUpHi800jl7z6Vx",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       },
@@ -222,7 +222,7 @@
       ],
       "credentials": {
         "httpBearerAuth": {
-          "id": "Jxb6k054cDqy24FF",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Bearer Auth account"
         }
       },
@@ -231,7 +231,7 @@
     {
       "parameters": {
         "operation": "sendPhoto",
-        "chatId": "-5425093758",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "binaryData": true,
         "additionalFields": {
           "caption": "=🔔 Change detected: {{ $('Normalize & Fingerprint').item.json.title }}\n{{ $json.choices[0].message.content }}\n📎 {{ $('Normalize & Fingerprint').item.json.url }}"
@@ -248,7 +248,7 @@
       "webhookId": "c2177c10-e7a4-43a4-a788-315f46722bbc",
       "credentials": {
         "telegramApi": {
-          "id": "XGEbrG2Yhp93qQSh",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Telegram account"
         }
       },
@@ -259,17 +259,17 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "CRM Simulation",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 540131206,
+          "value": "YOUR_SHEET_GID",
           "mode": "list",
           "cachedResultName": "Competition detection",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=540131206"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -356,7 +356,7 @@
       "name": "Update Last Known State",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "vOUpHi800jl7z6Vx",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       },
@@ -367,17 +367,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "CRM Simulation",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1971418435,
+          "value": "YOUR_SHEET_GID",
           "mode": "list",
           "cachedResultName": "History",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=1971418435"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -478,7 +478,7 @@
       "name": "Log to History (changed)",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "vOUpHi800jl7z6Vx",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       },
@@ -489,17 +489,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "CRM Simulation",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1971418435,
+          "value": "YOUR_SHEET_GID",
           "mode": "list",
           "cachedResultName": "History",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=1971418435"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -600,7 +600,7 @@
       "name": "Log to History (no change)",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "vOUpHi800jl7z6Vx",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       },
