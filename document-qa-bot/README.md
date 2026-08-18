@@ -33,5 +33,3 @@ Support and operations teams lose time manually searching long internal document
 
 ## Demo
 ![Demo placeholder](./assets/demo-placeholder.gif)
-
-> Placeholder: add a short Telegram Q&A demo GIF or video link.
