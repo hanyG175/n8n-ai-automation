@@ -1,0 +1,755 @@
+{
+  "name": "AI Competitor Watchdog",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "6fdfff83-ad31-476f-846d-cd25bc7cec15",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        16
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+        "options": {}
+      },
+      "id": "ee540690-4840-487e-98c9-a11f7863d97a",
+      "name": "Fetch Target Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        16
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "h1"
+            },
+            {
+              "key": "price",
+              "cssSelector": "p.price_color"
+            },
+            {
+              "key": "availability",
+              "cssSelector": "p.availability"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e1a57ad-b46d-4bf4-bdfb-c4f7bf66a273",
+      "name": "Extract Price & Stock",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        16
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Keep this in sync with the URL on the Fetch Target Page node.\n// For multi-URL monitoring, replace this constant with a value read\n// from a config sheet/table instead (see notes below).\nconst TARGET_URL = 'http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html';\nconst crypto = require('crypto');\nconst item = $input.first().json;\nconst rawPrice = (item.price || '').trim();\nconst priceNumber = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));\nconst availability = (item.availability || '').replace(/\\\\s+/g, ' ').trim();\nconst title = (item.title || '').trim();\nconst fingerprint = crypto  .createHash('sha256')  .update(`${priceNumber}|${availability}`)  .digest('hex');\nreturn [{  \n  json: {    \n    url: TARGET_URL,    \n    title,    \n    price: priceNumber, \n    priceRaw: rawPrice, \n    availability,    \n    fingerprint,    \n    checkedAt: new Date().toISOString()  \n  }}];"
+      },
+      "id": "47ddf330-61e6-4070-ba63-9a343746b9a0",
+      "name": "Normalize & Fingerprint",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        16
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "mode": "list",
+          "cachedResultName": "CRM Simulation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 540131206,
+          "mode": "list",
+          "cachedResultName": "Competition detection",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=540131206"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "url",
+              "lookupValue": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "70817457-f40b-48ec-9adf-bd9d44219ac2",
+      "name": "Get Last Known State",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        16
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vOUpHi800jl7z6Vx",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "11713d46-a208-4d49-856a-3a99393f35a4",
+              "leftValue": "={{ $('Normalize & Fingerprint').item.json.fingerprint }}",
+              "rightValue": "={{ $json.fingerprint }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2a34bb2-190c-4626-b5f5-dbaec01d516c",
+      "name": "Has It Changed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        16
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $('Normalize & Fingerprint').first().json;\nconst previous = $('Get Last Known State').first()?.json || {};\nconst oldPrice = parseFloat(previous.price) || null;\nconst newPrice = parseFloat(current.price);\nconst pctChange = oldPrice ? (((newPrice - oldPrice) / oldPrice) * 100).toFixed(1) : null;\nreturn [{  \n  json: \n  {    ...current,\n       oldPrice,\n       oldAvailability: previous.availability || 'unknown',    \n       pctChange, \n       diffText: `Title: ${current.title}\n       Old price: ${oldPrice ?? 'n/a'}\n       New price: ${newPrice}\n       Change: ${pctChange ?? 'n/a'}%\n       Old stock: ${previous.availability || 'unknown'}\n       New stock: ${current.availability}`  }}];"
+      },
+      "id": "623b08dc-3805-45ac-beef-1e6cd5654736",
+      "name": "Build Diff Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -80
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://quickchart.io/chart?width=500&height=260&c={{ encodeURIComponent(JSON.stringify({ type: 'line', data: { labels: ['-3h','-2h','-1h','now'], datasets: [{ label: 'Price history', data: [ $('Build Diff Summary').item.json.oldPrice, $('Build Diff Summary').item.json.oldPrice, $('Build Diff Summary').item.json.oldPrice, $('Build Diff Summary').item.json.price ] }] } })) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1792,
+        -80
+      ],
+      "id": "6f18ebeb-a9bc-444c-b720-41db289ecd63",
+      "name": "Generate Price Chart",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://qwen-api.kalima-ocr.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"model\": \"qwen-3.6-35b\",\n    \"messages\": [\n        {\"role\": \"user\", \"content\": {{ JSON.stringify(\"Write a punchy 2-sentence business alert (no preamble) summarizing this competitor product change for a busy client: \" + $json.diffText) }}}\n    ]\n}",
+        "options": {}
+      },
+      "id": "d91d2e90-b4aa-4f69-ab8f-bb205e1be023",
+      "name": "AI: Write Alert Summary1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1568,
+        -80
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "Jxb6k054cDqy24FF",
+          "name": "Bearer Auth account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "-5425093758",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "=🔔 Change detected: {{ $('Normalize & Fingerprint').item.json.title }}\n{{ $json.choices[0].message.content }}\n📎 {{ $('Normalize & Fingerprint').item.json.url }}"
+        }
+      },
+      "id": "9b9195b5-754a-4e89-b342-1aaae563c567",
+      "name": "Send a photo message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2016,
+        -80
+      ],
+      "webhookId": "c2177c10-e7a4-43a4-a788-315f46722bbc",
+      "credentials": {
+        "telegramApi": {
+          "id": "XGEbrG2Yhp93qQSh",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "mode": "list",
+          "cachedResultName": "CRM Simulation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 540131206,
+          "mode": "list",
+          "cachedResultName": "Competition detection",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=540131206"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Normalize & Fingerprint').item.json.url }}",
+            "title": "={{ $('Normalize & Fingerprint').item.json.title }}",
+            "price": "={{ $('Normalize & Fingerprint').item.json.price }}",
+            "availability": "={{ $('Normalize & Fingerprint').item.json.availability }}",
+            "fingerprint": "={{ $('Normalize & Fingerprint').item.json.fingerprint }}",
+            "checkedAt": "={{ $('Normalize & Fingerprint').item.json.checkedAt }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availability",
+              "displayName": "availability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "checkedAt",
+              "displayName": "checkedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2240,
+        -80
+      ],
+      "id": "ad4aced1-57ac-4ffd-a55f-714dcd0e0129",
+      "name": "Update Last Known State",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vOUpHi800jl7z6Vx",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "mode": "list",
+          "cachedResultName": "CRM Simulation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1971418435,
+          "mode": "list",
+          "cachedResultName": "History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=1971418435"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Normalize & Fingerprint').item.json.url }}",
+            "title": "={{ $('Normalize & Fingerprint').item.json.title }}",
+            "price": "={{ $('Normalize & Fingerprint').item.json.price }}",
+            "availability": "={{ $('Normalize & Fingerprint').item.json.availability }}",
+            "fingerprint": "={{ $('Normalize & Fingerprint').item.json.fingerprint }}",
+            "checkedAt": "={{ $('Normalize & Fingerprint').item.json.checkedAt }}",
+            "changed": "true"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availability",
+              "displayName": "availability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checkedAt",
+              "displayName": "checkedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "changed",
+              "displayName": "changed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2464,
+        -80
+      ],
+      "id": "c89d5007-e95e-4c12-bdc1-aee9d6fbd349",
+      "name": "Log to History (changed)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vOUpHi800jl7z6Vx",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0",
+          "mode": "list",
+          "cachedResultName": "CRM Simulation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1971418435,
+          "mode": "list",
+          "cachedResultName": "History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Pj3NN0z8Qzf0WDsZip0_DrN2RabFezJfmgE8RsB7_z0/edit#gid=1971418435"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Normalize & Fingerprint').item.json.url }}",
+            "title": "={{ $('Normalize & Fingerprint').item.json.title }}",
+            "price": "={{ $('Normalize & Fingerprint').item.json.price }}",
+            "availability": "={{ $('Normalize & Fingerprint').item.json.availability }}",
+            "fingerprint": "={{ $('Normalize & Fingerprint').item.json.fingerprint }}",
+            "checkedAt": "={{ $('Normalize & Fingerprint').item.json.checkedAt }}",
+            "changed": "false"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availability",
+              "displayName": "availability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checkedAt",
+              "displayName": "checkedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "changed",
+              "displayName": "changed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1344,
+        112
+      ],
+      "id": "a2deb208-0b70-4ee6-bae4-88cda5e9336f",
+      "name": "Log to History (no change)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vOUpHi800jl7z6Vx",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Target Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Target Page": {
+      "main": [
+        [
+          {
+            "node": "Extract Price & Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Price & Stock": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Fingerprint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Fingerprint": {
+      "main": [
+        [
+          {
+            "node": "Get Last Known State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Last Known State": {
+      "main": [
+        [
+          {
+            "node": "Has It Changed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has It Changed?": {
+      "main": [
+        [
+          {
+            "node": "Build Diff Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log to History (no change)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Diff Summary": {
+      "main": [
+        [
+          {
+            "node": "AI: Write Alert Summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Write Alert Summary1": {
+      "main": [
+        [
+          {
+            "node": "Generate Price Chart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Price Chart": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        [
+          {
+            "node": "Update Last Known State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Last Known State": {
+      "main": [
+        [
+          {
+            "node": "Log to History (changed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7d37a2f0-5c2d-4105-8008-52733e11a176",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9bde851abb562b4b83d61049914a0cddbe6e650a230f9481ab30e46c87cd1cad"
+  },
+  "nodeGroups": [],
+  "id": "W7buh2qrvDYCmcF1",
+  "tags": []
+}
