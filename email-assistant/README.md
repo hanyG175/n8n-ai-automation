@@ -14,7 +14,7 @@ Teams handling growing inbox volume need faster, consistent replies without losi
 ![Google Sheets](https://img.shields.io/badge/Google_Sheets-Message_Logging-34A853?logo=googlesheets&logoColor=white)
 
 ## Setup instructions
-1. Import `AI Email Assistant (2).json` into n8n.
+1. Import `AI Email Assistant.json` into n8n.
 2. Create and connect credentials (use your own values):
    - Gmail OAuth2
    - Google Sheets OAuth2
@@ -31,5 +31,3 @@ Teams handling growing inbox volume need faster, consistent replies without losi
 
 ## Demo
 ![Demo placeholder](./assets/demo-placeholder.gif)
-
-> Placeholder: add a short demo GIF or video link (Loom).
