@@ -12,36 +12,224 @@
         },
         "filters": {}
       },
-      "id": "63110525-dffa-43a6-aa61-4ba0e07f719c",
+      "id": "5c5b605b-f27c-428b-a5e1-82182c4aac5f",
       "name": "Inbox",
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.4,
       "position": [
-        -368,
-        256
+        -2192,
+        144
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "YOUR_CREDENTIAL_ID",
+          "id": "TdxWnyJUWXK5AuNB",
           "name": "Gmail account"
         }
       }
     },
     {
       "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "mode": "list",
+          "cachedResultName": "Answer Quality Record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1989240015,
+          "mode": "list",
+          "cachedResultName": "ProcessedEmails",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "message_Id",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
         "options": {}
       },
-      "id": "c31f35a9-604d-4883-811b-d94ca45a7e63",
+      "id": "8d67476a-9190-4a8c-ab4c-110938934884",
+      "name": "Get a row with message ID",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2000,
+        144
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "N2pqVYOMRECnqd5z",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "887f0047-a92b-44fe-bffe-28f5408562b1",
+              "leftValue": "={{ $('Get a row with message ID').item.json.message_Id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9f185a1c-2fe8-442a-aa4b-f0953a610656",
+              "leftValue": "={{ $('Inbox').item.json.payload }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "cb5f5ac1-abb9-4d21-8b1a-281c08d74866",
+      "name": "Check if message is drafted",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1792,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Message Already Drafted (Check Slack Channel to Approve)"
+      },
+      "id": "8cc94413-81a5-4a5e-a2dd-38ebdc31017e",
+      "name": "Stop and Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function findBody(parts, mimeType) {\n  for (const part of parts || []) {\n    if (part.mimeType === mimeType && part.body?.data) {\n      return part.body.data;\n    }\n    if (part.parts) {\n      const found = findBody(part.parts, mimeType);\n      if (found) return found;\n    }\n  }\n  return null;\n}\n\nfunction base64UrlDecode(data) {\n  const base64 = data.replace(/-/g, '+').replace(/_/g, '/');\n  return Buffer.from(base64, 'base64').toString('utf-8');\n}\n\n// Read the email directly from the Inbox node. The upstream Google Sheets\n// lookup emits an empty {} when no row matches (alwaysOutputData), which would\n// otherwise clobber the email payload flowing through $json.\nconst email = $('Inbox').item.json;\nconst payload = email.payload || {};\nlet bodyData = null;\n\nif (payload.body?.data) {\n  // single-part email, body sits directly on payload\n  bodyData = payload.body.data;\n} else if (payload.parts) {\n  // multipart email — prefer plain text, fall back to HTML\n  bodyData = findBody(payload.parts, 'text/plain') || findBody(payload.parts, 'text/html');\n}\n\nconst fullBody = bodyData ? base64UrlDecode(bodyData).replace(/<[^>]+>/g, '') : email.snippet; // last-resort fallback\n\nreturn [{ json: { ...email, fullBody } }];"
+      },
+      "id": "50e5062e-2371-4b28-964b-873d9751f421",
+      "name": "Extract the full text body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1568,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d6dffc47-0b70-432b-9a73-1786099adf77",
+              "name": "message_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "43e83ac9-031c-446a-993a-61d159b43200",
+              "name": "thread_Id",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "becb00f2-198d-47e0-9b22-f0bb1fb1f6c0",
+              "name": "From",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "375bae84-ee0b-4773-8649-a9e81da14173",
+              "name": "To",
+              "value": "={{ $json.To }}",
+              "type": "string"
+            },
+            {
+              "id": "e2b5cbbd-e3ed-440e-b05c-8456ebdaf8c1",
+              "name": "Subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "327883d9-73ed-4140-8e94-aade9bf65574",
+              "name": "body",
+              "value": "={{ $json.fullBody }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "95563e50-dc42-4072-bac2-8c8a27126bd9",
+      "name": "Filter Necessary Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -1376,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Subject }}: {{ $json.body }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Analyze this customer email and respond in this exact format, nothing else:\n     INTENT: [QUESTION|COMPLAINT|ORDER|COMPLIMENT|OTHER]\n     URGENCY: [1-5, where 5 is furious/legal-threat/urgent]\n     LANGUAGE: [detected language of the email]\n\nNote: QUESTION type should include everything that doesn't include the other intents, for example is a customer is asking about an order the intent is ORDER not QUESTION."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "6f4f0f9a-becf-4dd5-89be-7b77fe63f423",
+      "name": "LLM Email Intent Classification",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1152,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "id": "a4688158-a1ab-4603-b53b-2103d517637d",
       "name": "Google Gemini Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        1392,
-        896
+        -96,
+        1008
       ],
       "credentials": {
         "googlePalmApi": {
-          "id": "YOUR_CREDENTIAL_ID",
+          "id": "VzbjRwUYy0IccXWb",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -50,40 +238,74 @@
       "parameters": {
         "jsCode": "const text = $input.first().json.text;\n   const intent = text.match(/INTENT:\\s*(\\w+)/)?.[1] || 'OTHER';\n   const urgency = parseInt(text.match(/URGENCY:\\s*(\\d)/)?.[1] || '1');\n   const language = text.match(/LANGUAGE:\\s*(.+)/)?.[1]?.trim() || 'English';\n   return [{ json: { ...$('Filter Necessary Data').first().json, intent, urgency, language } }];"
       },
-      "id": "879a94f1-757d-43af-8779-2950ad557f3c",
+      "id": "81c0fb4b-9924-4fb6-9a27-ca547ba7ae60",
       "name": "Parse Classification",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1024,
-        272
+        -800,
+        160
       ]
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9a4d8917-cc16-42be-86d6-dc57138c71a6",
+              "leftValue": "={{ $json.urgency }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ae00c99d-13fb-43ab-88f6-f76c744cc314",
+      "name": "Check Urgency Score",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -576,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
+          "value": "C0BNJBL15UP",
           "mode": "list",
           "cachedResultName": "client-updates"
         },
         "text": "={{ $('Parse Classification').item.json.Subject }}{{ $('Parse Classification').item.json.body }}{{ $('Parse Classification').item.json.From }}",
         "otherOptions": {}
       },
-      "id": "af5555ee-894f-46c8-82bd-b72d135620d1",
+      "id": "5fafc32d-2d18-4461-8a92-df9b1c101110",
       "name": "Send a message",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        1472,
-        144
+        -352,
+        32
       ],
-      "webhookId": "0aa913f5-c9b4-4230-9cbd-89796eb8e848",
+      "webhookId": "9c7cc559-c860-494b-87c6-87c92113e61f",
       "credentials": {
-        "slackApi": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Slack account 2"
+        "slackOAuth2Api": {
+          "id": "ulqKgRvr6J0T31nX",
+          "name": "Slack account"
         }
       }
     },
@@ -219,115 +441,14 @@
         },
         "options": {}
       },
-      "id": "bda0b7d5-1619-48f5-833d-bb3b1a7a20ca",
+      "id": "37ba8013-8ec7-4a08-8c3e-4661f78c4f41",
       "name": "Switch",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        1472,
-        336
+        -352,
+        224
       ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Customer email:\nSubject: {{ $json.Subject }}\n{{ $json.body }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "=You are a professional customer service agent. Write a sincere, empathetic reply in {{ $json.language }}. Acknowledge the problem, apologize, and offer a specific solution. Never promise a specific refund amount or discount unless explicitly given below. Keep it under 100 words. \nSign off as \"Customer Service Team\"."
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "id": "380d1407-1654-43d3-b9fe-31c1d8751d82",
-      "name": "COMPLAINT Response",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        2144,
-        192
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Customer email:\nSubject: {{ $('Parse Order Number').item.json.Subject }}\n{{ $('Parse Order Number').item.json.body }}\nOrder details: {{ $json.orderNumber ? `Order #${$json.orderNumber} - Status: ${$json.status} - Item: ${$json.item} - Expected: ${$json.expectedDate}` : 'No matching order found.' }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "=You are a professional customer service agent. Reply in {{ $('Parse Order Number').item.json.language }} using only the order details provided below — do not invent status, dates, or amounts. If no order details are given, ask the customer to confirm their order number. Keep it under 100 words. \nSign off as \"Customer Service Team\"."
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "id": "d904c5a6-30db-4c7b-aa78-910189a68678",
-      "name": "ORDER Response",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        2144,
-        384
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Customer email:\nSubject: {{ $json.subject }}\n{{ $json.body }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "=You are a professional customer service agent. Write a short, warm thank-you reply in {{ $json.language }}. Do not apologize for anything or sound defensive. Keep it under 60 words. \nSign off as \"Customer Service Team\"."
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "id": "8d283bfc-a33b-4d60-938a-0ddba80d44f8",
-      "name": "COMPLIMENT Response",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        2144,
-        576
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Customer email:\nSubject: {{ $json.Subject }}\n{{ $json.body }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "=Write a brief, polite acknowledgment in {{ $json.language }} saying the team will follow up shortly. Do not attempt to answer or resolve anything — this email needs human review. Keep it under 40 words."
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "id": "761891d5-18ff-42df-afb9-a89fcbf7a251",
-      "name": "OTHER Response",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        2144,
-        768
-      ]
-    },
-    {
-      "parameters": {
-        "errorMessage": "Message Already Drafted (Check Slack Channel to Approve)"
-      },
-      "type": "n8n-nodes-base.stopAndError",
-      "typeVersion": 1,
-      "position": [
-        256,
-        96
-      ],
-      "id": "414e42e3-20cb-4f50-b9e0-a04c4ff82188",
-      "name": "Stop and Error"
     },
     {
       "parameters": {
@@ -338,551 +459,43 @@
         },
         "batching": {}
       },
-      "id": "b5978ca4-220c-41bc-821e-eb35e47600d3",
+      "id": "0fd1f928-cd2d-4a66-a232-539b56c5f951",
       "name": "QUESTION Response",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        2144,
-        0
+        320,
+        -112
       ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "887f0047-a92b-44fe-bffe-28f5408562b1",
-              "leftValue": "={{ $json.message_Id }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "exists",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        32,
-        256
-      ],
-      "id": "0d6e1e82-9b52-43a9-80e6-a9fbda1d33ad",
-      "name": "Check if message is drafted"
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "YOUR_SHEET_ID",
-          "mode": "list",
-          "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "YOUR_SHEET_GID",
-          "mode": "list",
-          "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "message_Id",
-              "lookupValue": "={{ $json.id }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "fb62b822-948d-4fbc-8947-20d811e45921",
-      "name": "Get a row with message ID",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        -176,
-        256
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "function findBody(parts, mimeType) {\n  for (const part of parts || []) {\n    if (part.mimeType === mimeType && part.body?.data) {\n      return part.body.data;\n    }\n    if (part.parts) {\n      const found = findBody(part.parts, mimeType);\n      if (found) return found;\n    }\n  }\n  return null;\n}\n\nfunction base64UrlDecode(data) {\n  const base64 = data.replace(/-/g, '+').replace(/_/g, '/');\n  return Buffer.from(base64, 'base64').toString('utf-8');\n}\n\nconst payload = $json.payload;\nlet bodyData = null;\n\nif (payload.body?.data) {\n  // single-part email, body sits directly on payload\n  bodyData = payload.body.data;\n} else if (payload.parts) {\n  // multipart email — prefer plain text, fall back to HTML\n  bodyData = findBody(payload.parts, 'text/plain') || findBody(payload.parts, 'text/html');\n}\n\nconst fullBody = bodyData ? base64UrlDecode(bodyData).replace(/<[^>]+>/g, '') : $json.snippet; // last-resort fallback\n\nreturn [{ json: { ...$json, fullBody } }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        256,
-        272
-      ],
-      "id": "6bbb807c-65a3-4fd2-869a-8251dfcf8eb0",
-      "name": "Extract the full text body"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "d6dffc47-0b70-432b-9a73-1786099adf77",
-              "name": "message_id",
-              "value": "={{ $json.id }}",
-              "type": "string"
-            },
-            {
-              "id": "43e83ac9-031c-446a-993a-61d159b43200",
-              "name": "thread_Id",
-              "value": "={{ $json.threadId }}",
-              "type": "string"
-            },
-            {
-              "id": "becb00f2-198d-47e0-9b22-f0bb1fb1f6c0",
-              "name": "From",
-              "value": "={{ $json.From }}",
-              "type": "string"
-            },
-            {
-              "id": "375bae84-ee0b-4773-8649-a9e81da14173",
-              "name": "To",
-              "value": "={{ $json.To }}",
-              "type": "string"
-            },
-            {
-              "id": "e2b5cbbd-e3ed-440e-b05c-8456ebdaf8c1",
-              "name": "Subject",
-              "value": "={{ $json.Subject }}",
-              "type": "string"
-            },
-            {
-              "id": "327883d9-73ed-4140-8e94-aade9bf65574",
-              "name": "body",
-              "value": "={{ $json.fullBody }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "61083916-093f-4244-8d9c-749d75a11228",
-      "name": "Filter Necessary Data",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        448,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.Subject }}: {{ $json.body }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "Analyze this customer email and respond in this exact format, nothing else:\n     INTENT: [QUESTION|COMPLAINT|ORDER|COMPLIMENT|OTHER]\n     URGENCY: [1-5, where 5 is furious/legal-threat/urgent]\n     LANGUAGE: [detected language of the email]\n\nNote: QUESTION type should include everything that doesn't include the other intents, for example is a customer is asking about an order the intent is ORDER not QUESTION."
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "id": "aac4bdea-7913-42c6-8d75-7e24c2644811",
-      "name": "LLM Email Intent Classification",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        672,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "9a4d8917-cc16-42be-86d6-dc57138c71a6",
-              "leftValue": "={{ $json.urgency }}",
-              "rightValue": 4,
-              "operator": {
-                "type": "number",
-                "operation": "gte"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "1d8438fa-fc5c-42c1-b918-4af3802bf13e",
-      "name": "Check Urgency Score",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1248,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const body = $json.body;\n   const match = body.match(/ORD-(\\d{4,10})/); // adjust pattern to your order ID format\n   return [{ json: { ...$json, orderNumber: match ? match[1] : null } }];"
-      },
-      "id": "4d36a131-9787-4644-b7d4-2c2898d8947b",
-      "name": "Parse Order Number",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1744,
-        384
-      ]
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "YOUR_SHEET_ID",
-          "mode": "list",
-          "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "YOUR_SHEET_GID",
-          "mode": "list",
-          "cachedResultName": "Orders",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "orderNumber",
-              "lookupValue": "=ORD-{{ $json.orderNumber }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "67bde319-729a-4710-a85f-511237fae59f",
-      "name": "Get Order Record",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        1920,
-        384
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      },
-      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
+          "value": "C0BNJBL15UP",
           "mode": "list",
-          "cachedResultName": "client-updates"
+          "cachedResultName": "client-updates",
+          "cachedResultUrl": ""
         },
         "messageType": "block",
         "blocksUi": "={\n  \"blocks\": [\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": {{ JSON.stringify(\"*Validate Reply To the Email *\\nSent By: \" + $('Switch').item.json.From) }}\n      }\n    },\n{\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": {{ JSON.stringify(\"*Subject*: Re: \" + $('Switch').item.json.Subject) }}\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": {{ JSON.stringify($json.text) }}\n      }\n    },\n    {\n      \"type\": \"actions\",\n      \"block_id\": \"expense-1\",\n      \"elements\": [\n        {\n          \"type\": \"button\",\n          \"text\": { \"type\": \"plain_text\", \"text\": \"Approve\", \"emoji\": true },\n          \"style\": \"primary\",\n          \"action_id\": \"approve_email\",\n          \"value\": \n{{ JSON.stringify($('Switch').item.json.message_id + \"/\"+ $('Switch').item.json.thread_Id) }}\n},\n        {\n          \"type\": \"button\",\n          \"text\": { \"type\": \"plain_text\", \"text\": \"Deny\", \"emoji\": true },\n          \"style\": \"danger\",\n          \"action_id\": \"deny_email\"\n        }\n      ]\n    }\n  ]\n}",
         "text": "Approve sending the reply email ",
         "otherOptions": {}
       },
-      "id": "c1455e08-781d-4206-ab60-154d007493f7",
+      "id": "4246d11c-4f89-468b-9afa-9cd31d077ba7",
       "name": "Send a Reply Draft to the Channel",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        2800,
-        384
+        976,
+        272
       ],
-      "webhookId": "7cc7e85f-2e23-4c7d-9d35-f5dfd03eaaf1",
+      "webhookId": "27629826-1a5c-46ea-a5e9-45dfd6256681",
       "credentials": {
         "slackApi": {
-          "id": "YOUR_CREDENTIAL_ID",
+          "id": "ulqKgRvr6J0T31nX",
           "name": "Slack account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "585939d7-b8f1-4780-883e-ed5a13c37c79",
-        "options": {}
-      },
-      "id": "e0e3c4c9-96e2-4986-821d-4fb7173c7e6b",
-      "name": "Get Validation Result",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        -32,
-        1232
-      ],
-      "webhookId": "585939d7-b8f1-4780-883e-ed5a13c37c79"
-    },
-    {
-      "parameters": {
-        "jsCode": "// 1. Get the raw payload string from the webhook body\nconst rawPayload = $input.first().json.body?.body?.payload || $input.first().json.body?.payload;\n\n// 2. Parse the stringified JSON into a real object\nconst data = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;\n\n// 3. Extract the action ID (e.g., \"deny_email\" or \"approve_email\")\nconst action = data?.actions?.[0]?.action_id || null;\n\n// Extract the combined value string from Slack's action payload\nconst actionValue = data?.actions?.[0]?.value || '';\n\n// Split by slash\nconst [message_id, thread_id] = actionValue.split('/');\n\n// 4. Extract main message text\nconst messageText = data?.message?.text || '';\n\n// 5. Extract texts from blocks\nconst blockTexts = data?.message?.blocks\n  ?.filter(b => b.text?.text)\n  .map(b => b.text.text) || [];\n\nreturn [{\n  json: {\n    action, \n    message_id,\n    thread_id,                // \"deny_email\"\n    messageText,                               // \"Approve sending the reply email \"\n    emailTo: blockTexts[0].slice(28) || '',         // \"*Validate Email To Send*\\nTo: Hani Gaouaou...\"\n    emailSubject: blockTexts[1].slice(11) || '',\n    // \"Re: ...\"\n    emailBody: blockTexts[2] || ''            // \"Hello Aisha, thank you for reaching out...\"\n  }\n}];"
-      },
-      "id": "8eda7aab-4cd7-4b6e-959f-538b332de44a",
-      "name": "Parse Necessary Data",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        208,
-        1232
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "b7bcf007-7b07-40a7-a056-18a5ebeaaba6",
-              "leftValue": "={{ $json.action }}",
-              "rightValue": "approve_email",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "8463bd37-782c-4021-a59c-958c1bf61808",
-      "name": "Check Validation Result",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        416,
-        1232
-      ]
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "YOUR_SHEET_ID",
-          "mode": "list",
-          "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "YOUR_SHEET_GID",
-          "mode": "list",
-          "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "message_Id",
-              "lookupValue": "={{ $json.message_id }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "feb5c874-ec28-479c-a2e5-9e97f1736d4b",
-      "name": "Get The Drafted Email Record",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        656,
-        1072
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Google Sheets account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "thread",
-        "operation": "reply",
-        "threadId": "={{ $json.thread_Id }}",
-        "messageId": "={{ $json.message_Id }}",
-        "message": "={{ $json[' draftedReply'] }}",
-        "options": {}
-      },
-      "id": "281aaaac-bc04-453e-b653-efacdadf4a93",
-      "name": "Send the Draft",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        880,
-        1072
-      ],
-      "webhookId": "76d5fee2-2b59-4db4-ac96-4aeae094fd6e",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "YOUR_SHEET_ID",
-          "mode": "list",
-          "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "YOUR_SHEET_GID",
-          "mode": "list",
-          "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "message_Id": "={{ $('Get The Drafted Email Record').item.json.message_Id }}",
-            " is_sent": "=True"
-          },
-          "matchingColumns": [
-            "message_Id"
-          ],
-          "schema": [
-            {
-              "id": "message_Id",
-              "displayName": "message_Id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "thread_Id",
-              "displayName": "thread_Id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "from",
-              "displayName": "from",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "subject",
-              "displayName": "subject",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": " intent",
-              "displayName": " intent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": " urgency",
-              "displayName": " urgency",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": " draftedReply",
-              "displayName": " draftedReply",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": " is_sent",
-              "displayName": " is_sent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "id": "08066a57-9946-427e-af9f-72fee684a5f3",
-      "name": "Update Draft Status to \"Sent\"",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        1152,
-        1072
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Google Sheets account"
         }
       }
     },
@@ -891,17 +504,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "YOUR_SHEET_ID",
+          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "YOUR_SHEET_GID",
+          "value": 1989240015,
           "mode": "list",
           "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_SHEET_GID"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -1003,20 +616,501 @@
         },
         "options": {}
       },
-      "id": "bc2cc9d0-fc9a-4156-8964-8505e8a42663",
+      "id": "84db1901-18d4-4a16-bac6-d9d9d6a49083",
       "name": "Log Email Draft as \"Not Sent\"",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2992,
-        384
+        1168,
+        272
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "YOUR_CREDENTIAL_ID",
+          "id": "N2pqVYOMRECnqd5z",
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer email:\nSubject: {{ $json.Subject }}\n{{ $json.body }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a professional customer service agent. Write a sincere, empathetic reply in {{ $json.language }}. Acknowledge the problem, apologize, and offer a specific solution. Never promise a specific refund amount or discount unless explicitly given below. Keep it under 100 words. \nSign off as \"Customer Service Team\"."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "72e78256-d86b-4907-a1b3-db5e85cee193",
+      "name": "COMPLAINT Response",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\n   const match = body.match(/ORD-(\\d{4,10})/); // adjust pattern to your order ID format\n   return [{ json: { ...$json, orderNumber: match ? match[1] : null } }];"
+      },
+      "id": "5ea2afa5-b3e3-4ae3-b87b-c6fb82c585c7",
+      "name": "Parse Order Number",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "mode": "list",
+          "cachedResultName": "Answer Quality Record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 249000695,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=249000695"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "orderNumber",
+              "lookupValue": "=ORD-{{ $json.orderNumber }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "57c5228f-d001-44af-9a06-7f06c7bb6eb9",
+      "name": "Get Order Record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        272
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "N2pqVYOMRECnqd5z",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer email:\nSubject: {{ $('Parse Order Number').item.json.Subject }}\n{{ $('Parse Order Number').item.json.body }}\nOrder details: {{ $json.orderNumber ? `Order #${$json.orderNumber} - Status: ${$json.status} - Item: ${$json.item} - Expected: ${$json.expectedDate}` : 'No matching order found.' }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a professional customer service agent. Reply in {{ $('Parse Order Number').item.json.language }} using only the order details provided below — do not invent status, dates, or amounts. If no order details are given, ask the customer to confirm their order number. Keep it under 100 words. \nSign off as \"Customer Service Team\"."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "0423cc1c-c66d-4313-a330-4798efa17d4f",
+      "name": "ORDER Response",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        320,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer email:\nSubject: {{ $json.subject }}\n{{ $json.body }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a professional customer service agent. Write a short, warm thank-you reply in {{ $json.language }}. Do not apologize for anything or sound defensive. Keep it under 60 words. \nSign off as \"Customer Service Team\"."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "81fa5925-9a02-4289-acb3-84ff40fd2bc5",
+      "name": "COMPLIMENT Response",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        320,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer email:\nSubject: {{ $json.Subject }}\n{{ $json.body }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Write a brief, polite acknowledgment in {{ $json.language }} saying the team will follow up shortly. Do not attempt to answer or resolve anything — this email needs human review. Keep it under 40 words."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "2a246ca3-4fe5-437a-8572-43c60a63e0a1",
+      "name": "OTHER Response",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        320,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "585939d7-b8f1-4780-883e-ed5a13c37c79",
+        "options": {}
+      },
+      "id": "468cf7db-f062-4ddf-b7a9-4a10c3d588e2",
+      "name": "Get Validation Result",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2176,
+        912
+      ],
+      "webhookId": "585939d7-b8f1-4780-883e-ed5a13c37c79"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw payload string from the webhook body\nconst rawPayload = $input.first().json.body?.body?.payload || $input.first().json.body?.payload;\n\n// 2. Parse the stringified JSON into a real object\nconst data = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;\n\n// 3. Extract the action ID (e.g., \"deny_email\" or \"approve_email\")\nconst action = data?.actions?.[0]?.action_id || null;\n\n// Extract the combined value string from Slack's action payload\nconst actionValue = data?.actions?.[0]?.value || '';\n\n// Split by slash\nconst [message_id, thread_id] = actionValue.split('/');\n\n// 4. Extract main message text\nconst messageText = data?.message?.text || '';\n\n// 5. Extract texts from blocks\nconst blockTexts = data?.message?.blocks\n  ?.filter(b => b.text?.text)\n  .map(b => b.text.text) || [];\n\nconst responseUrl = data?.response_url || '';\n\nreturn [{\n  json: {\n    responseUrl,\n    action, \n    message_id,\n    thread_id,                // \"deny_email\"\n    messageText,                               // \"Approve sending the reply email \"\n    emailTo: blockTexts[0].slice(52).replace('&lt;','').replace('&gt;','') || '',         // \"*Validate Email To Send*\\nTo: Hani Gaouaou...\"\n    emailSubject: blockTexts[1].slice(11) || '',\n    // \"Re: ...\"\n    emailBody: blockTexts[2] || ''            // \"Hello Aisha, thank you for reaching out...\"\n  }\n}];"
+      },
+      "id": "e24e956f-4f44-4761-845b-b6bbaf1bfc4b",
+      "name": "Parse Necessary Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1952,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "thread",
+        "operation": "reply",
+        "threadId": "={{ $json.thread_Id }}",
+        "messageId": "={{ $json.message_Id }}",
+        "message": "={{ $json[' draftedReply'] }}",
+        "options": {}
+      },
+      "id": "07f06d6c-68d9-4c03-9137-37c991a7b22d",
+      "name": "Send the Draft",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        784
+      ],
+      "webhookId": "851e611a-66bc-43d5-9fbf-01c8cb89a464",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TdxWnyJUWXK5AuNB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "mode": "list",
+          "cachedResultName": "Answer Quality Record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1989240015,
+          "mode": "list",
+          "cachedResultName": "ProcessedEmails",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "message_Id": "={{ $('Check Validation Result1').item.json.message_Id }}",
+            " is_sent": "=True"
+          },
+          "matchingColumns": [
+            "message_Id"
+          ],
+          "schema": [
+            {
+              "id": "message_Id",
+              "displayName": "message_Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "thread_Id",
+              "displayName": "thread_Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "from",
+              "displayName": "from",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": " intent",
+              "displayName": " intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": " urgency",
+              "displayName": " urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": " draftedReply",
+              "displayName": " draftedReply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": " is_sent",
+              "displayName": " is_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f333caa4-7997-4075-8876-28f5046c89f3",
+      "name": "Update Draft Status to \"Sent\"",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -896,
+        784
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "N2pqVYOMRECnqd5z",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "24446d88-bc7f-4d81-b8dd-83b4e6cf223f",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2192,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "admin",
+        "subject": "An error in the workflow",
+        "message": "An error in the workflow",
+        "options": {}
+      },
+      "id": "81190e95-5826-47bc-abb4-c520413260bf",
+      "name": "Send a message1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1968,
+        1184
+      ],
+      "webhookId": "ef75dddd-1607-4208-b43f-24018aa8b13f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TdxWnyJUWXK5AuNB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "mode": "list",
+          "cachedResultName": "Answer Quality Record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1989240015,
+          "mode": "list",
+          "cachedResultName": "ProcessedEmails",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "message_Id",
+              "lookupValue": "={{ $json.message_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ab8d5dd5-28e3-4cc8-b047-1e1c14da9074",
+      "name": "Get The Drafted Email Record1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1728,
+        912
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "N2pqVYOMRECnqd5z",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b7bcf007-7b07-40a7-a056-18a5ebeaaba6",
+              "leftValue": "={{ $json[' is_sent'] }}",
+              "rightValue": "False",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "3e039d2c-3009-4285-97f9-c6e54e603d95",
+              "leftValue": "={{ $('Parse Necessary Data').item.json.action }}",
+              "rightValue": "approve_email",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e95a1259-80e8-44ad-b3f3-a79340ed3f34",
+      "name": "Check Validation Result1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1472,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Parse Necessary Data').item.json.responseUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"replace_original\": true,\n  \"text\": \"Email validation processed.\",\n  \"blocks\": [\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"✅ *Action Completed*\\nThis email reply has been processed and sent, and the action buttons have been disabled.\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        784
+      ],
+      "id": "a1c5e87b-4dbc-407d-83c8-acbf3c23bf56",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Parse Necessary Data').item.json.responseUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"replace_original\": true,\n  \"text\": \"Email validation processed.\",\n  \"blocks\": [\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"✅ *Action Completed*\\nThis email reply has been denied or already set. The action buttons have been disabled.\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1136,
+        1056
+      ],
+      "id": "631bb816-d31e-43c6-9195-5eb2bac4adf9",
+      "name": "HTTP Request1"
     }
   ],
   "pinData": {},
@@ -1026,6 +1120,68 @@
         [
           {
             "node": "Get a row with message ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row with message ID": {
+      "main": [
+        [
+          {
+            "node": "Check if message is drafted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if message is drafted": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract the full text body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract the full text body": {
+      "main": [
+        [
+          {
+            "node": "Filter Necessary Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Necessary Data": {
+      "main": [
+        [
+          {
+            "node": "LLM Email Intent Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Email Intent Classification": {
+      "main": [
+        [
+          {
+            "node": "Parse Classification",
             "type": "main",
             "index": 0
           }
@@ -1079,6 +1235,24 @@
         ]
       ]
     },
+    "Check Urgency Score": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Switch": {
       "main": [
         [
@@ -1118,11 +1292,55 @@
         ]
       ]
     },
+    "QUESTION Response": {
+      "main": [
+        [
+          {
+            "node": "Send a Reply Draft to the Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a Reply Draft to the Channel": {
+      "main": [
+        [
+          {
+            "node": "Log Email Draft as \"Not Sent\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "COMPLAINT Response": {
       "main": [
         [
           {
             "node": "Send a Reply Draft to the Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Order Number": {
+      "main": [
+        [
+          {
+            "node": "Get Order Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Record": {
+      "main": [
+        [
+          {
+            "node": "ORDER Response",
             "type": "main",
             "index": 0
           }
@@ -1162,130 +1380,6 @@
         ]
       ]
     },
-    "QUESTION Response": {
-      "main": [
-        [
-          {
-            "node": "Send a Reply Draft to the Channel",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check if message is drafted": {
-      "main": [
-        [
-          {
-            "node": "Stop and Error",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Extract the full text body",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get a row with message ID": {
-      "main": [
-        [
-          {
-            "node": "Check if message is drafted",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract the full text body": {
-      "main": [
-        [
-          {
-            "node": "Filter Necessary Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filter Necessary Data": {
-      "main": [
-        [
-          {
-            "node": "LLM Email Intent Classification",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "LLM Email Intent Classification": {
-      "main": [
-        [
-          {
-            "node": "Parse Classification",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Urgency Score": {
-      "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Switch",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse Order Number": {
-      "main": [
-        [
-          {
-            "node": "Get Order Record",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Order Record": {
-      "main": [
-        [
-          {
-            "node": "ORDER Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send a Reply Draft to the Channel": {
-      "main": [
-        [
-          {
-            "node": "Log Email Draft as \"Not Sent\"",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get Validation Result": {
       "main": [
         [
@@ -1301,29 +1395,7 @@
       "main": [
         [
           {
-            "node": "Check Validation Result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Validation Result": {
-      "main": [
-        [
-          {
-            "node": "Get The Drafted Email Record",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get The Drafted Email Record": {
-      "main": [
-        [
-          {
-            "node": "Send the Draft",
+            "node": "Get The Drafted Email Record1",
             "type": "main",
             "index": 0
           }
@@ -1341,24 +1413,69 @@
         ]
       ]
     },
-    "Log Email Draft as \"Not Sent\"": {
+    "Error Trigger": {
       "main": [
-        []
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Validation Result1": {
+      "main": [
+        [
+          {
+            "node": "Send the Draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get The Drafted Email Record1": {
+      "main": [
+        [
+          {
+            "node": "Check Validation Result1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Draft Status to \"Sent\"": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": false
+    "binaryMode": "separate"
   },
-  "versionId": "aad528b8-69c1-4570-b70a-8ca3d5613402",
+  "versionId": "509d5d39-3a9b-402d-98aa-cec2237b6635",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "d4c35d8cb71462448884eabb1081711777d626ce27cf96adf620ee577971667a"
+    "instanceId": "16c7f3939da4bfd85e60858ca0a44a474d0aadfdd48875aaf3457ea4495250dd"
   },
   "nodeGroups": [],
-  "id": "mEn1Ss720PeKd65l",
+  "id": "nJygV99F6Ozm9H1F",
   "tags": []
 }
