@@ -22,7 +22,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "TdxWnyJUWXK5AuNB",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -31,17 +31,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1989240015,
+          "value": "YOUR_PROCESSED_EMAILS_SHEET_GID",
           "mode": "list",
           "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_PROCESSED_EMAILS_SHEET_GID"
         },
         "filtersUI": {
           "values": [
@@ -64,7 +64,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "N2pqVYOMRECnqd5z",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       }
@@ -229,7 +229,7 @@
       ],
       "credentials": {
         "googlePalmApi": {
-          "id": "VzbjRwUYy0IccXWb",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -286,7 +286,7 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "C0BNJBL15UP",
+          "value": "YOUR_SLACK_CHANNEL_ID",
           "mode": "list",
           "cachedResultName": "client-updates"
         },
@@ -304,7 +304,7 @@
       "webhookId": "9c7cc559-c860-494b-87c6-87c92113e61f",
       "credentials": {
         "slackOAuth2Api": {
-          "id": "ulqKgRvr6J0T31nX",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Slack account"
         }
       }
@@ -473,7 +473,7 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "C0BNJBL15UP",
+          "value": "YOUR_SLACK_CHANNEL_ID",
           "mode": "list",
           "cachedResultName": "client-updates",
           "cachedResultUrl": ""
@@ -494,7 +494,7 @@
       "webhookId": "27629826-1a5c-46ea-a5e9-45dfd6256681",
       "credentials": {
         "slackApi": {
-          "id": "ulqKgRvr6J0T31nX",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Slack account 2"
         }
       }
@@ -504,17 +504,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1989240015,
+          "value": "YOUR_PROCESSED_EMAILS_SHEET_GID",
           "mode": "list",
           "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_PROCESSED_EMAILS_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -626,7 +626,7 @@
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "N2pqVYOMRECnqd5z",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       }
@@ -670,17 +670,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 249000695,
+          "value": "YOUR_ORDERS_SHEET_GID",
           "mode": "list",
           "cachedResultName": "Orders",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=249000695"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_ORDERS_SHEET_GID"
         },
         "filtersUI": {
           "values": [
@@ -703,7 +703,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "N2pqVYOMRECnqd5z",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       },
@@ -824,7 +824,7 @@
       "webhookId": "851e611a-66bc-43d5-9fbf-01c8cb89a464",
       "credentials": {
         "gmailOAuth2": {
-          "id": "TdxWnyJUWXK5AuNB",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -834,17 +834,17 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1989240015,
+          "value": "YOUR_PROCESSED_EMAILS_SHEET_GID",
           "mode": "list",
           "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_PROCESSED_EMAILS_SHEET_GID"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -952,7 +952,7 @@
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "N2pqVYOMRECnqd5z",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       }
@@ -986,7 +986,7 @@
       "webhookId": "ef75dddd-1607-4208-b43f-24018aa8b13f",
       "credentials": {
         "gmailOAuth2": {
-          "id": "TdxWnyJUWXK5AuNB",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -995,17 +995,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU",
+          "value": "YOUR_SHEET_ID",
           "mode": "list",
           "cachedResultName": "Answer Quality Record",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1989240015,
+          "value": "YOUR_PROCESSED_EMAILS_SHEET_GID",
           "mode": "list",
           "cachedResultName": "ProcessedEmails",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14AfqTNffwZB-Ey53PmFBk3gZpbqe99HwM_COWMmLpzU/edit#gid=1989240015"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit#gid=YOUR_PROCESSED_EMAILS_SHEET_GID"
         },
         "filtersUI": {
           "values": [
@@ -1027,7 +1027,7 @@
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "N2pqVYOMRECnqd5z",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets account"
         }
       }

@@ -21,13 +21,14 @@ Teams handling growing inbox volume need faster, consistent replies without losi
    - Slack API
 3. Configure placeholders in the workflow:
    - `YOUR_SHEET_ID`
-   - `YOUR_SHEET_GID`
+   - `YOUR_PROCESSED_EMAILS_SHEET_GID`
+   - `YOUR_ORDERS_SHEET_GID`
    - `YOUR_SLACK_CHANNEL_ID`
    - `YOUR_CREDENTIAL_ID`
 4. Enable the Gmail trigger and webhook nodes after validating permissions.
 
 ## Workflow JSON
-[Download workflow JSON](./AI%20Email%20Assistant%20(2).json)
+[Download workflow JSON](./AI%20Email%20Assistant.json)
 
 ## Demo
 ![Demo placeholder](./assets/demo-placeholder.gif)
