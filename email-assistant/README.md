@@ -30,4 +30,4 @@ Teams handling growing inbox volume need faster, consistent replies without losi
 [Download workflow JSON](./AI%20Email%20Assistant%20(2).json)
 
 ## Demo
-![Demo placeholder](./assets/demo-placeholder.gif)
+![Demo placeholder](./assets/demo.mp4)
